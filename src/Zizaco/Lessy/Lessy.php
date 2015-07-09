@@ -2,8 +2,7 @@
 
 use lessc;
 
-class Lessy
-{
+class Lessy {
 
     /**
      * Less compiler
@@ -24,15 +23,17 @@ class Lessy
      *
      * @param  Illuminate\Foundation\Application  $app
      */
-    public function __construct($app)
-    {
+    public function __construct($app) {
         $this->_app = $app;
         $this->lessc = new lessc;
     }
 
-    public function compileTree($origin, $destination)
-    {
+    public function compileTree($origin, $destination) {
         $this->compileLessFiles(false, $origin, $destination);
+
+        if ($this->app['config']->get('lessy::auto_minify')) {
+            $this->minify();
+        }
     }
 
     /**
@@ -41,31 +42,31 @@ class Lessy
      * @param  bool  $verbose
      * @return void
      */
-    public function compileLessFiles( $verbose = false, $origin = null, $destination = null )
-    {
-        $root =        $this->_app['path'].'/';
-        $origin =      $origin ?: $this->_app['config']->get('lessy::origin');
+    public function compileLessFiles($verbose = false, $origin = null, $destination = null) {
+        $root = $this->_app['path'].'/';
+        $origin = $origin ?: $this->_app['config']->get('lessy::origin');
         $destination = $destination ?: $this->_app['config']->get('lessy::destination');
 
-        if( empty($origin) )
-            $origin = 'less';
+        if (empty($origin)) {
+            $origin = 'less/styles';
+        }
 
-        if( empty($destination) )
-            $destination = '../public/assets/css';
+        if (empty($destination)) {
+            $destination = '../public/stylesheets/min';
+        }
 
-        if( $verbose )
-        {
-            print_r( 'LESS files: <app>/'.$origin."\n" );
-            print_r( 'Output to:  <app>/'.$destination."\n\n" );
+        if ($verbose) {
+            print_r('LESS files: <app>/'.$origin."\n");
+            print_r('Output to:  <app>/'.$destination."\n\n");
         }
 
         $origin =      $root.$origin;
         $destination = $root.$destination;
 
-        if ( ! is_dir($destination) )
+        if (! is_dir($destination))
             mkdir($destination, 0775, true);
 
-        $tree = $this->compileRecursive( $origin.'/', $destination.'/', '', $verbose );
+        $tree = $this->compileRecursive($origin.'/', $destination.'/', '', $verbose);
     }
 
     /**
@@ -77,54 +78,45 @@ class Lessy
      * @param  bool  $verbose
      * @return array
      */
-    protected function compileRecursive( $origin, $destiny, $offset = '', $verbose = false )
-    {
+    protected function compileRecursive($origin, $destiny, $offset = '', $verbose = false) {
         $tree = array();
 
-        if( ! is_dir($origin.$offset) )
-        {
+        if (! is_dir($origin.$offset)) {
             return $tree;
         }
 
-        $dir = scandir( $origin.$offset );
+        $dir = scandir($origin.$offset);
 
-        foreach ( $dir as $filename )
-        {
-            if ( is_dir( $origin.$offset.$filename ) and $filename != '.' and $filename != '..')
-            {
-                if ( ! file_exists( $destiny.$offset.$filename ) )
-                {
-                    mkdir( $destiny.$offset.$filename );
+        foreach ($dir as $filename) {
+            if (is_dir($origin.$offset.$filename) and $filename != '.' and $filename != '..') {
+                if (! file_exists($destiny.$offset.$filename)) {
+                    mkdir($destiny.$offset.$filename);
                 }
 
                 // Recursive call
-                $tree[$filename] = $this->compileRecursive( $origin, $destiny, $offset.$filename.'/', $verbose );
+                $tree[$filename] = $this->compileRecursive($origin, $destiny, $offset.$filename.'/', $verbose);
             }
-            elseif ( is_file( $origin.$offset.$filename ))
-            {
-                if ( substr($filename,-5) == '.less' or substr($filename,-4) == '.css' )
-                {
+            elseif (is_file($origin.$offset.$filename)) {
+                if (substr($filename,-5) == '.less' or substr($filename,-4) == '.css') {
                     $tree[] = $filename;
 
-                    if( $verbose )
+                    if ($verbose)
                     {
-                        print_r( $offset.$filename."\n" );
+                        print_r($offset.$filename."\n");
                     }
 
                     // Compile file
                     $this->lessc->checkedCompile(
                         $origin.$offset.$filename,
                         $destiny.$offset.substr($filename,0,strrpos($filename,'.',-1)).'.css'
-                    );
+                   );
                 }
-                else
-                {
+                else {
                     $in = $origin.$offset.$filename;
                     $out = $destiny.$offset.$filename;
 
-                    if( $verbose )
-                    {
-                        print_r( $offset.$filename."\n" );
+                    if ($verbose) {
+                        print_r($offset.$filename."\n");
                     }
 
                     // Copy any assets that the css/less may use
@@ -132,7 +124,7 @@ class Lessy
                         copy(
                             $in,
                             $out
-                        );
+                       );
                     }
                 }
             }
@@ -147,31 +139,32 @@ class Lessy
      * @param  bool  $verbose
      * @return void
      */
-    public function compileSingleFile( $filename, $verbose = false )
-    {
+    public function compileSingleFile($filename, $verbose = false) {
         $root =        $this->_app['path'].'/';
         $origin =      $this->_app['config']->get('lessy::origin');
         $destination = $this->_app['config']->get('lessy::destination');
 
-        if( empty($origin) )
+        if (empty($origin)) {
             $origin = 'less';
+        }
 
-        if( empty($destination) )
-            $destination = '../public/assets/css';
+        if (empty($destination)) {
+            $destination = '../public/assets/stylesheets/min';
+        }
 
         $origin .= '/'.$filename;
 
-        if( $verbose )
-        {
-            print_r( 'LESS file: <app>/'.$origin."\n" );
-            print_r( 'Output to:  <app>/'.$destination."\n\n" );
+        if ($verbose) {
+            print_r('LESS file: <app>/'.$origin."\n");
+            print_r('Output to:  <app>/'.$destination."\n\n");
         }
 
         $origin =      $root.$origin;
         $destination = $root.$destination;
 
-        if ( ! is_dir($destination) )
+        if (! is_dir($destination)) {
             mkdir($destination, 0775, true);
+        }
 
         // Compile file
         $this->lessc->compileFile(
@@ -179,7 +172,7 @@ class Lessy
             $destination.'/'.substr($filename,0,strrpos($filename,'.',-1)).'.css'
         );
     }
-    
+
     /**
      * Minify all css files
      *
@@ -187,29 +180,32 @@ class Lessy
      * @return void
      */
     public function minify($destination = null) {
-    	print_r("Minifying...\n");
-    	$buffer = '';
-    	 
-    	$destination = $destination ?: $this->_app['config']->get('lessy::destination');
-    	$root = $this->_app['path'].'/';
-    	 
-    	if( empty($destination) )
-    		$destination = '../public/assets/css';
-    	 
-    	$destination = $root.$destination;
-    	 
-    	foreach (\File::allFiles($destination) as $File) {
-    		$buffer .= \File::get($File->getPathname());
-    		\File::delete($File->getPathname());
-    	}
-    	 
-    	$buffer = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $buffer);
-    	$buffer = str_replace(array("\r\n","\r","\n","\t",'  ','    ','     '), '', $buffer);
-    	$buffer = preg_replace(array('(( )+{)','({( )+)'), '{', $buffer);
-    	$buffer = preg_replace(array('(( )+})','(}( )+)','(;( )*})'), '}', $buffer);
-    	$buffer = preg_replace(array('(;( )+)','(( )+;)'), ';', $buffer);
-    	 
-    	\File::put($destination.'/styles.min.css', $buffer);
+        if ($verbose) {
+           print_r("Minifying...\n");
+        }
+
+        $buffer = '';
+        $destination = $destination ?: $this->_app['config']->get('lessy::destination');
+        $root = $this->_app['path'].'/';
+
+        if (empty($destination)) {
+            $destination = '../public/assets/css';
+        }
+
+        $destination = $root.$destination;
+
+        foreach (\File::allFiles($destination) as $File) {
+            $buffer .= \File::get($File->getPathname());
+            \File::delete($File->getPathname());
+        }
+
+        $buffer = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $buffer);
+        $buffer = str_replace(array("\r\n","\r","\n","\t",'  ','    ','     '), '', $buffer);
+        $buffer = preg_replace(array('(( )+{)','({( )+)'), '{', $buffer);
+        $buffer = preg_replace(array('(( )+})','(}( )+)','(;( )*})'), '}', $buffer);
+        $buffer = preg_replace(array('(;( )+)','(( )+;)'), ';', $buffer);
+
+        \File::put($destination.'/style.min.css', $buffer);
     }
 
 }

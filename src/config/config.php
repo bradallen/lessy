@@ -12,7 +12,7 @@ return array(
     |
     */
 
-    'origin'        => 'less',
+    'origin'        => 'less/styles',
 
     'destination'   => '../public/assets/css',
 
@@ -45,7 +45,7 @@ return array(
     */
 
     'manual_compile_only' => false,
-	
+
 	/*
 	 |--------------------------------------------------------------------------
 	| Auto minify files in styles.css
