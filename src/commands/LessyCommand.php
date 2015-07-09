@@ -52,7 +52,7 @@ class LessyCommand extends Command {
         $lessy->compileLessFiles( true );
 
         if ($this->app['config']->get('lessy::auto_minify')) {
-        	$lessy->minify();
+        	$lessy->minify(true);
         }
 
         $this->info("Done\n");

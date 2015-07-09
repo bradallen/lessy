@@ -29,10 +29,10 @@ class Lessy {
     }
 
     public function compileTree($origin, $destination) {
-        $this->compileLessFiles(false, $origin, $destination);
+        $this->compileLessFiles(true, $origin, $destination);
 
         if ($this->app['config']->get('lessy::auto_minify')) {
-            $this->minify();
+            $this->minify(true);
         }
     }
 
@@ -178,7 +178,7 @@ class Lessy {
      * @param  string  $destination
      * @return void
      */
-    public function minify($destination = null, $verbose = false) {
+    public function minify($verbose = false, $destination = null) {
         if ($verbose) {
            print_r("Minifying...\n");
         }
