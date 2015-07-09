@@ -100,8 +100,7 @@ class Lessy {
                 if (substr($filename,-5) == '.less' or substr($filename,-4) == '.css') {
                     $tree[] = $filename;
 
-                    if ($verbose)
-                    {
+                    if ($verbose) {
                         print_r($offset.$filename."\n");
                     }
 
@@ -179,7 +178,7 @@ class Lessy {
      * @param  string  $destination
      * @return void
      */
-    public function minify($destination = null) {
+    public function minify($destination = null, $verbose = false) {
         if ($verbose) {
            print_r("Minifying...\n");
         }
