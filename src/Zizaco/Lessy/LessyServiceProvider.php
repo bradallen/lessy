@@ -2,7 +2,7 @@
 
 use Illuminate\Support\ServiceProvider;
 
-define('LESSY_VERSION', 'bradallen\'s fork 0.1');
+define('LESSY_VERSION', 'bradallen\'s fork');
 
 class LessyServiceProvider extends ServiceProvider {
 
@@ -24,7 +24,7 @@ class LessyServiceProvider extends ServiceProvider {
          */
         if($this->app->__get('env') != 'production'  || $this->app['config']->get('lessy::force_compile'))
         {
-            $this->package('zizaco/lessy');
+            $this->package('bradallen/lessy');
             $lessy = new Lessy($this->app);
 
             // Compiles less file if manual_compile_only is not enabled
@@ -45,7 +45,7 @@ class LessyServiceProvider extends ServiceProvider {
             return new Lessy($app);
         });
 
-        $this->app['config']->package('zizaco/lessy', __DIR__.'/../../config');
+        $this->app['config']->package('bradallen/lessy', __DIR__.'/../../config');
 
         $this->app['command.lessy.compile'] = $this->app->share(function($app) {
             return new LessyCommand($app);
