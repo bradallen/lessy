@@ -2,7 +2,7 @@
 
 use Illuminate\Support\ServiceProvider;
 
-define('LESSY_VERSION', 'bradallen\'s fork');
+define('LESSY_VERSION', 'bradallen\'s fork (version 1.0)');
 
 class LessyServiceProvider extends ServiceProvider {
 

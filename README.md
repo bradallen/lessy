@@ -26,7 +26,7 @@ Note that the **automatic compilation does not occur when the application is in 
 
 In the `require` key of `composer.json` file add the following
 
-    "bradallen/lessy": "dev-master"
+    "bradallen/lessy": "~1.0"
 
 Run the Composer update comand
 
